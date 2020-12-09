@@ -6,12 +6,11 @@ import Grid from '@material-ui/core/Grid';
 import Container from '@material-ui/core/Container'
 import List from '@material-ui/core/List';
 import TextField from '@material-ui/core/TextField';
-import Alert from '@material-ui/lab/Alert';
 import Button from '@material-ui/core/Button';
 import SaveIcon from '@material-ui/icons/Save';
 import {withStyles} from "@material-ui/core/styles";
 import UserItem from "./components/UserItem";
-import Collapse from '@material-ui/core/Collapse';
+import Alert from './components/CustomAlert'
 
 const styles = theme => ({
     button: {
@@ -33,9 +32,7 @@ class App extends Component {
         this.handleAdd = this.handleAdd.bind(this)
         this.handleDelete = this.handleDelete.bind(this)
         this.handleChange = this.handleChange.bind(this)
-        this.handleAlertAdd = this.handleAlertAdd.bind(this)
-        this.handleAlertDelete = this.handleAlertDelete.bind(this)
-        this.handleAlertFormValidate = this.handleAlertFormValidate.bind(this)
+        this.handleAlert = this.handleAlert.bind(this)
         this.handleChange = this.handleChange.bind(this)
 
         this.state = {
@@ -43,9 +40,9 @@ class App extends Component {
             auxEmail: '',
             auxCity: '',
             auxState: '',
-            alertAdd: false,
-            alertDelete: false,
-            alertForm: false,
+            alert: false,
+            typeAlert: '',
+            textAlert: '',
             users: []
         }
     }
@@ -72,9 +69,9 @@ class App extends Component {
                 ...prevState,
                 users: [...users, newUser]
             }))
-            this.handleAlertAdd()
+            this.handleAlert('success', 'Usuário salvo com sucesso!')
         } else {
-            this.handleAlertFormValidate()
+            this.handleAlert('error', 'Preencha todos os campos!')
         }
 
     }
@@ -82,12 +79,11 @@ class App extends Component {
     handleDelete(id) {
         const newItems = this.state.users.filter(user => user.id !== id)
         this.setState(prevState => ({...prevState, users: newItems}))
-        this.handleAlertDelete()
+        this.handleAlert('success', 'Usuário deletado com sucesso')
     }
 
     handleChange(e) {
-        const name = e.target.name
-        switch (name) {
+        switch (e.target.name) {
             case 'name':
                 this.setState(prevState => ({...prevState, auxName: e.target.value}))
                 break
@@ -103,34 +99,21 @@ class App extends Component {
         }
     }
 
-    handleAlertAdd() {
-        this.setState(prevState => ({...prevState, alertAdd: true}))
-        setTimeout((e) => {
-            this.setState(prevState => ({...prevState, alertAdd: false}))
-        }, 1500)
-    }
-
-    handleAlertDelete() {
-        this.setState(prevState => ({...prevState, alertDelete: true}))
-        setTimeout((e) => {
-            this.setState(prevState => ({...prevState, alertDelete: false}))
-        }, 1500)
-    }
-
-    handleAlertFormValidate() {
-        this.setState(prevState => ({...prevState, alertForm: true}))
-        setTimeout((e) => {
-            this.setState(prevState => ({...prevState, alertForm: false}))
-        }, 1500)
+    handleAlert(type, text) {
+        this.setState(prevState => ({
+            ...prevState,
+            alert: true,
+            typeAlert: type,
+            textAlert: text,
+        }))
+        setTimeout(() => {
+            this.setState(prevState => ({...prevState, alert: false}))
+        }, 2000)
     }
 
     validateForm() {
         const {auxName, auxEmail, auxCity, auxState} = this.state
-        if (auxName !== '' && auxEmail !== '' && auxCity !== '' && auxState !== '' ) {
-            return true;
-        } else {
-            return false;
-        }
+        return auxName !== '' && auxEmail !== '' && auxCity !== '' && auxState !== '';
     }
 
     render() {
@@ -140,9 +123,9 @@ class App extends Component {
             auxEmail,
             auxCity,
             auxState,
-            alertAdd,
-            alertDelete,
-            alertForm
+            alert,
+            typeAlert,
+            textAlert
         } = this.state
         const {classes} = this.props
         return (
@@ -150,30 +133,11 @@ class App extends Component {
                 <div className="container">
                     <Grid item xs={12}>
                         <Paper elevation={3} className={classes.container}>
-                            <Collapse in={alertAdd}>
-                                <Alert
-                                    variant="filled"
-                                    severity="success"
-                                >
-                                    Usuário salvo com sucesso!
-                                </Alert>
-                            </Collapse>
-                            <Collapse in={alertDelete}>
-                                <Alert
-                                    variant="filled"
-                                    severity="success"
-                                >
-                                    Usuário deletado com sucesso!
-                                </Alert>
-                            </Collapse>
-                            <Collapse in={alertForm}>
-                                <Alert
-                                    variant="filled"
-                                    severity="error"
-                                >
-                                    Preencha todos os campos!
-                                </Alert>
-                            </Collapse>
+                            <Alert
+                                alert={alert}
+                                textAlert={textAlert}
+                                typeAlert={typeAlert}
+                            />
                             <h1>Inserir usuário</h1>
                             <Grid container spacing={10}>
                                 <Grid item>
